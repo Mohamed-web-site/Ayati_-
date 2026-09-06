@@ -255,9 +255,12 @@ svg{width:20px;height:20px;flex-shrink:0;display:block;}
 .fontsize-row{display:flex; align-items:center; gap:10px;}
 .fontsize-row .iconbtn{width:38px;height:38px; background:var(--bg-deep); font-weight:800; font-size:13px;}
 .fontsize-preview{flex:1; text-align:center; font-family:var(--font-quran); color:var(--ink); padding:8px; background:var(--bg-deep); border-radius:var(--r-sm);}
+.backup-note{font-size:11.5px; color:var(--ink-faint); line-height:1.7; margin-bottom:8px;}
+.backup-note.ok{color:var(--emerald-600); font-weight:700;}
 
 /* ---------- Tools (prayer / qibla) ---------- */
 .tool-card{background:var(--card); border:1px solid var(--line); border-radius:var(--r-md); padding:16px; margin-bottom:14px; box-shadow:var(--shadow-sm);}
+.form-row{display:flex; gap:8px;}
 .prayer-hero{position:relative; text-align:center; padding:22px 18px; margin:0 16px 16px; border-radius:var(--r-lg); overflow:hidden;
   background:linear-gradient(150deg, var(--emerald-600), var(--emerald-900)); color:#fff; box-shadow:var(--shadow-md);}
 .prayer-hero::after{content:''; position:absolute; inset:0; background-image:repeating-linear-gradient(45deg, rgba(203,162,90,.07) 0 2px, transparent 2px 22px); pointer-events:none;}
@@ -337,6 +340,17 @@ svg{width:20px;height:20px;flex-shrink:0;display:block;}
 
 <script>
 'use strict';
+
+/* Guarantee the splash screen always disappears, no matter what happens below. */
+(function(){
+  function forceHideSplash(){
+    var el = document.getElementById('splash');
+    if(el) el.classList.add('hide');
+  }
+  setTimeout(forceHideSplash, 3000);
+  window.addEventListener('error', forceHideSplash);
+  window.__forceHideSplash = forceHideSplash;
+})();
 
 /* =====================================================================
    ICONS  (all bare, unwrapped SVGs default to 20x20 via the global "svg" rule)
@@ -423,6 +437,10 @@ const STR = {
   toastAddedFav:'أُضيف إلى المفضلة', toastRemovedFav:'أُزيل من المفضلة',
   pickedReciter:'تم اختيار: ', pleasePickReciter:'يرجى اختيار قارئ يشمل هذه السورة', playErr:'تعذر تشغيل الرابط الصوتي',
   settingsTitle:'الإعدادات', settingsAppearance:'المظهر', settingsTheme:'لون التطبيق', settingsLanguage:'اللغة', settingsNumerals:'شكل الأرقام',
+  settingsBackup:'حفظ الإعدادات', backupAuto:'يتم حفظ إعداداتك تلقائياً وستجدها كما هي عند فتح التطبيق مجدداً.',
+  backupManualNote:'الحفظ التلقائي غير متاح في طريقة التشغيل هذه. انسخ رمز إعداداتك واحفظه، ثم الصقه هنا لاستعادته لاحقاً.',
+  backupExport:'نسخ الإعدادات', backupImport:'استيراد', backupPlaceholder:'رمز الإعدادات يظهر هنا…', backupCopied:'تم نسخ رمز الإعدادات',
+  backupImportOk:'تم استرجاع الإعدادات', backupImportErr:'رمز غير صالح',
   settingsFontSize:'حجم خط الآيات', fontPreview:'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
   settingsBg:'خلفية التطبيق', bgKaaba:'الكعبة المشرفة', bgMadinah:'المسجد النبوي', bgNone:'بدون صورة', bgCustom:'من جهازك',
   themeEmerald:'زمردي', themeTeal:'فيروزي', themeSepia:'كهرماني', themeBurgundy:'عنّابي', themeMidnight:'ليلي',
@@ -456,6 +474,10 @@ const STR = {
   toastAddedFav:'Added to favorites', toastRemovedFav:'Removed from favorites',
   pickedReciter:'Selected: ', pleasePickReciter:'Please choose a reciter who has this surah', playErr:'Could not play this audio',
   settingsTitle:'Settings', settingsAppearance:'Appearance', settingsTheme:'App color', settingsLanguage:'Language', settingsNumerals:'Number format',
+  settingsBackup:'Save settings', backupAuto:'Your settings are saved automatically and will be here next time you open the app.',
+  backupManualNote:"Auto-save isn't available in this run mode. Copy your settings code and save it, then paste it back here to restore.",
+  backupExport:'Copy settings', backupImport:'Import', backupPlaceholder:'Settings code appears here…', backupCopied:'Settings code copied',
+  backupImportOk:'Settings restored', backupImportErr:'Invalid code',
   settingsFontSize:'Ayah text size', fontPreview:'In the name of Allah, the Merciful',
   settingsBg:'App background', bgKaaba:'The Kaaba', bgMadinah:"Prophet's Mosque", bgNone:'No image', bgCustom:'From device',
   themeEmerald:'Emerald', themeTeal:'Teal', themeSepia:'Sepia', themeBurgundy:'Burgundy', themeMidnight:'Midnight',
@@ -480,7 +502,7 @@ const STATE = {
   lastRead:null,
   selectedMoshaf:null,
   playing:null,
-  settings:{theme:'emerald', lang:'ar', numerals:'ar', fontScale:1, bgImage:'kaaba', bgOpacity:0.07},
+  settings:{theme:'emerald', lang:'ar', numerals:'en', fontScale:1, bgImage:'kaaba', bgOpacity:0.07},
   _reciters:null,
   epoch:0,
   sheetEpoch:0
@@ -531,11 +553,50 @@ function surahName(id){
 /* =====================================================================
    THEME / LANGUAGE / FONT SIZE
    ===================================================================== */
+const STORAGE_KEY = 'ayaty_settings_v1';
+function hasStorageApi(){ return typeof window!=='undefined' && window.storage && typeof window.storage.set==='function'; }
+async function saveSettings(){
+  if(!hasStorageApi()) return;
+  try{
+    const toSave = Object.assign({}, STATE.settings);
+    delete toSave.bgImage_customNote;
+    await window.storage.set(STORAGE_KEY, JSON.stringify(toSave), false);
+  }catch(e){ /* storage unavailable in this environment — settings just won't persist */ }
+}
+async function loadSettings(){
+  if(!hasStorageApi()) return;
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      const saved = JSON.parse(res.value);
+      Object.assign(STATE.settings, saved);
+      if(STATE.settings.bgImage==='custom') STATE.settings.bgImage = 'kaaba'; // a photo blob can't survive a reload
+    }
+  }catch(e){ /* key not found yet, or storage unavailable — use defaults */ }
+}
+function applyAllSettings(){
+  applyTheme(STATE.settings.theme || 'emerald');
+  applyBackground(STATE.settings.bgImage || 'kaaba');
+  document.documentElement.setAttribute('lang', STATE.settings.lang==='ar'?'ar':'en');
+  document.documentElement.setAttribute('dir', STATE.settings.lang==='ar'?'rtl':'ltr');
+  document.documentElement.style.setProperty('--ayat-font-size', (23*(STATE.settings.fontScale||1))+'px');
+}
+function exportSettingsCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(STATE.settings)))); }catch(e){ return ''; } }
+function importSettingsCode(code){
+  try{
+    const saved = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    Object.assign(STATE.settings, saved);
+    if(STATE.settings.bgImage==='custom') STATE.settings.bgImage = 'kaaba';
+    applyAllSettings(); saveSettings();
+    return true;
+  }catch(e){ return false; }
+}
 function applyTheme(name){
   const th = THEMES[name]||THEMES.emerald;
   const appEl = $('#app');
   Object.keys(th).forEach(k=>appEl.style.setProperty(k, th[k]));
   STATE.settings.theme = name;
+  saveSettings();
 }
 const BG_PRESETS = {
   kaaba:"url('https://commons.wikimedia.org/wiki/Special:FilePath/The_Kaaba_during_Hajj.jpg')",
@@ -552,6 +613,7 @@ function applyBackground(choice, customUrl){
     appEl.style.setProperty('--app-bg-opacity', choice==='none' ? '0' : '0.07');
   }
   STATE.settings.bgImage = choice;
+  if(choice!=='custom') saveSettings();
 }
 function handleCustomBgFile(file){
   if(!file) return;
@@ -568,11 +630,13 @@ function setLang(l){
   document.documentElement.setAttribute('dir', l==='ar'?'rtl':'ltr');
   STATE.cache = {}; MASTER_SUWAR = null; STATE._reciters = null;
   STATE.stack = [{screen:'settings', params:{}}];
+  saveSettings();
   render();
 }
 function setFontScale(v){
   STATE.settings.fontScale = Math.round(v*10)/10;
   document.documentElement.style.setProperty('--ayat-font-size', (23*STATE.settings.fontScale)+'px');
+  saveSettings();
   renderSettings();
 }
 
@@ -632,7 +696,11 @@ $('#mpClose').innerHTML = ICON.close;
    NAVIGATION
    ===================================================================== */
 function nav(screen, params={}, push=true){ if(push) STATE.stack.push({screen, params}); render(); $('#content').scrollTop=0; }
-function back(){ if(STATE.stack.length>1){ STATE.stack.pop(); render(); $('#content').scrollTop=0; } }
+function back(){
+  if(STATE.stack.length>1){ STATE.stack.pop(); render(); }
+  else { STATE.stack = [{screen:'home', params:{}}]; render(); }
+  $('#content').scrollTop=0;
+}
 function current(){ return STATE.stack[STATE.stack.length-1]; }
 const ROOTS = ['home','suwar','reciters','radios'];
 function rootOf(screen){ return ROOTS.includes(screen) ? screen : 'more'; }
@@ -696,7 +764,7 @@ function renderTopbar(){
   const topbarEl = $('#topbar');
   if(screen==='home'){ topbarEl.style.display='none'; topbarEl.innerHTML=''; return; }
   topbarEl.style.display='flex';
-  const isRoot = STATE.stack.length===1;
+  const isRoot = false;
   const titles = {
     home:['آياتي','القرآن الكريم'], suwar:[t('fSurahs'),''], reader:[params.name||'', t('reading')],
     reciters:[t('fReciters'),''], reciterMoshaf:[params.reciterName||'','اختر المصحف'],
@@ -1354,11 +1422,22 @@ function renderSettings(){
           <button class="iconbtn ghost" id="fsUp">A+</button>
         </div>
       </div>
+      <div class="settings-card">
+        <div class="settings-row-label">${t('settingsBackup')}</div>
+        ${hasStorageApi() ? `<div class="backup-note ok">${t('backupAuto')}</div>` : `
+          <div class="backup-note">${t('backupManualNote')}</div>
+          <div class="form-row">
+            <button class="pill-btn" id="exportBtn">${ICON.image}<span>${t('backupExport')}</span></button>
+            <button class="pill-btn" id="importBtn">${ICON.image}<span>${t('backupImport')}</span></button>
+          </div>
+          <textarea id="backupCode" rows="2" placeholder="${t('backupPlaceholder')}" style="width:100%;margin-top:8px;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px;font-size:11px;background:var(--bg-deep);color:var(--ink);resize:none;"></textarea>
+        `}
+      </div>
     </div>
   `);
   $('#content').querySelectorAll('[data-theme]').forEach(b=>b.addEventListener('click', ()=>{ applyTheme(b.getAttribute('data-theme')); renderSettings(); }));
   $('#content').querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click', ()=>setLang(b.getAttribute('data-lang'))));
-  $('#content').querySelectorAll('[data-numerals]').forEach(b=>b.addEventListener('click', ()=>{ STATE.settings.numerals = b.getAttribute('data-numerals'); renderSettings(); }));
+  $('#content').querySelectorAll('[data-numerals]').forEach(b=>b.addEventListener('click', ()=>{ STATE.settings.numerals = b.getAttribute('data-numerals'); saveSettings(); renderSettings(); }));
   $('#content').querySelectorAll('[data-bg]').forEach(b=>b.addEventListener('click', ()=>{
     const choice = b.getAttribute('data-bg');
     if(choice==='custom-trigger'){ $('#bgFileInput').click(); return; }
@@ -1367,6 +1446,20 @@ function renderSettings(){
   $('#bgFileInput').addEventListener('change', (e)=>handleCustomBgFile(e.target.files[0]));
   $('#fsDown').addEventListener('click', ()=>setFontScale(Math.max(.8, STATE.settings.fontScale-.1)));
   $('#fsUp').addEventListener('click', ()=>setFontScale(Math.min(1.6, STATE.settings.fontScale+.1)));
+  const exportBtn = $('#exportBtn'), importBtn = $('#importBtn');
+  if(exportBtn) exportBtn.addEventListener('click', ()=>{
+    const code = exportSettingsCode();
+    $('#backupCode').value = code;
+    $('#backupCode').select();
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(()=>showToast(t('backupCopied'))).catch(()=>{}); }
+    else showToast(t('backupCopied'));
+  });
+  if(importBtn) importBtn.addEventListener('click', ()=>{
+    const code = $('#backupCode').value;
+    if(!code || !importSettingsCode(code)){ showToast(t('backupImportErr')); return; }
+    showToast(t('backupImportOk'));
+    renderSettings();
+  });
 }
 
 /* =====================================================================
@@ -1524,12 +1617,16 @@ async function fetchQibla(lat, lon, myEpoch){
 }
 async function toggleLiveCompass(btn){
   if(STATE._compassHandler){ stopLiveCompass(); btn.classList.remove('active'); btn.querySelector('span').textContent = STATE.settings.lang==='ar'?'تفعيل البوصلة المباشرة':'Enable live compass'; return; }
+  let gotAbsolute = false, gotAny = false;
   const start = ()=>{
     const handler = (e)=>{
       let heading = null;
-      if(typeof e.webkitCompassHeading === 'number') heading = e.webkitCompassHeading;
-      else if(typeof e.alpha === 'number') heading = 360 - e.alpha;
+      const isAbsoluteEvent = e.type === 'deviceorientationabsolute' || e.absolute === true;
+      if(typeof e.webkitCompassHeading === 'number'){ heading = e.webkitCompassHeading; gotAbsolute = true; }
+      else if(isAbsoluteEvent && typeof e.alpha === 'number'){ heading = 360 - e.alpha; gotAbsolute = true; }
+      else if(!gotAbsolute && typeof e.alpha === 'number'){ heading = 360 - e.alpha; }
       if(heading===null) return;
+      gotAny = true;
       const svg = $('#qiblaCompassSvg'); const needle = $('#qiblaNeedle');
       if(!svg || !needle){ stopLiveCompass(); return; }
       svg.style.transform = `rotate(${-heading}deg)`;
@@ -1539,6 +1636,13 @@ async function toggleLiveCompass(btn){
     window.addEventListener('deviceorientationabsolute', handler);
     window.addEventListener('deviceorientation', handler);
     btn.classList.add('active'); btn.querySelector('span').textContent = STATE.settings.lang==='ar'?'إيقاف البوصلة المباشرة':'Disable live compass';
+    setTimeout(()=>{
+      if(!gotAny && STATE._compassHandler){
+        stopLiveCompass(); btn.classList.remove('active');
+        btn.querySelector('span').textContent = STATE.settings.lang==='ar'?'تفعيل البوصلة المباشرة':'Enable live compass';
+        showToast(STATE.settings.lang==='ar' ? 'تعذر الوصول إلى حساس اتجاه جهازك — تأكد من تفعيل أذونات الحركة للمتصفح.' : 'Could not access your device\'s orientation sensor — check motion permissions for your browser.');
+      }
+    }, 2500);
   };
   if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
     try{ const res = await DeviceOrientationEvent.requestPermission(); if(res==='granted') start(); else showToast(t('qiblaErr')); }
@@ -1802,10 +1906,13 @@ function renderAzkarDuaRows(q){
    INIT
    ===================================================================== */
 function hideSplash(){ $('#splash').classList.add('hide'); }
-setTimeout(hideSplash, 3000);
-// Warm the reciters cache in the background so Reciters/Riwayat/Moshaf feel instant.
+// Warm caches in the background so Surahs/Reciters/Riwayat/Moshaf feel instant.
 getJSON(API.reciters()).then(d=>{ if(!STATE._reciters) STATE._reciters = d.reciters || d.reads || []; }).catch(()=>{});
-render();
+loadMasterSuwar().catch(()=>{});
+(async function boot(){
+  try{ await loadSettings(); applyAllSettings(); }catch(e){ console.error('Ayaty settings load error:', e); }
+  try{ render(); }catch(e){ console.error('Ayaty init error:', e); window.__forceHideSplash && window.__forceHideSplash(); }
+})();
 </script>
 
 </body>
