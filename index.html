@@ -90,6 +90,7 @@ svg{width:20px;height:20px;flex-shrink:0;display:block;}
 .iconbtn.play{width:36px;height:36px; border-radius:50%; background:var(--emerald-700); color:#fff; flex:0 0 auto;}
 .iconbtn.play svg{width:16px;height:16px;}
 .iconbtn.play.active{background:var(--gold-600);}
+.iconbtn.play.play-error{background:#B23A3A;}
 .iconbtn svg{width:20px;height:20px;}
 
 /* ---------- Content ---------- */
@@ -383,7 +384,10 @@ const ICON = {
   compass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15 9-2 5-5 2 2-5 5-2Z"/></svg>',
   image:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m5 17 4.5-4.5 3 3L18 10l1 1.5"/></svg>',
   beads:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.2" r="1.6" fill="currentColor" stroke="none"/><circle cx="17.6" cy="6.4" r="1.6" fill="currentColor" stroke="none"/><circle cx="19.8" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="17.6" cy="17.6" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="19.8" r="1.6" fill="currentColor" stroke="none"/><circle cx="6.4" cy="17.6" r="1.6" fill="currentColor" stroke="none"/><circle cx="4.2" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="6.4" cy="6.4" r="1.6" fill="currentColor" stroke="none"/><path d="M12 12 L12 4.2"/></svg>',
-  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.7v.1"/></svg>'
+  info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.7v.1"/></svg>',
+  person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3.5v3M16 3.5v3"/></svg>',
+  mosque:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v2M4 21v-6a8 8 0 0 1 16 0v6"/><path d="M4 21h16M9 21v-4a3 3 0 0 1 6 0v4"/></svg>'
 };
 
 /* =====================================================================
@@ -392,6 +396,65 @@ const ICON = {
 const LOGO_URI = 'data:image/png;base64,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';
 const MP3_BASE = 'https://www.mp3quran.net/api/v3';
 const ISLAMIC_BASE = 'https://api.islamic.app/v1';
+const SUNNAH_BASE = 'https://sunnah.amanahagent.cloud/api/v1';
+const SUNNAH_KEY = 'sk_sunnah_1ab8ff8aacc7b655ef13d200f79e29037da4f294c6649eb2';
+async function sunnahGet(path, timeoutMs){
+  const cacheKey = 'SUNNAH::'+path;
+  if(STATE.cache[cacheKey]) return STATE.cache[cacheKey];
+  const sep = path.includes('?') ? '&' : '?';
+  const attempts = [
+    { url: SUNNAH_BASE+path+sep+'key='+encodeURIComponent(SUNNAH_KEY), opts:{} },
+    { url: SUNNAH_BASE+path, opts:{headers:{'X-API-Key':SUNNAH_KEY}} }
+  ];
+  let lastErr = null;
+  for(const attempt of attempts){
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), timeoutMs||12000);
+    try{
+      const res = await fetch(attempt.url, Object.assign({signal:ctrl.signal}, attempt.opts));
+      clearTimeout(timer);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      STATE.cache[cacheKey] = data;
+      return data;
+    }catch(e){ clearTimeout(timer); lastErr = e; console.warn('Ayaty: sunnahGet attempt failed:', attempt.url, e); }
+  }
+  throw lastErr;
+}
+async function sunnahPost(path, body, timeoutMs){
+  const sep = path.includes('?') ? '&' : '?';
+  const attempts = [
+    { url: SUNNAH_BASE+path+sep+'key='+encodeURIComponent(SUNNAH_KEY), opts:{method:'POST', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(body)} },
+    { url: SUNNAH_BASE+path, opts:{method:'POST', headers:{'Content-Type':'application/json','X-API-Key':SUNNAH_KEY}, body:JSON.stringify(body)} }
+  ];
+  let lastErr = null;
+  for(const attempt of attempts){
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), timeoutMs||15000);
+    try{
+      const res = await fetch(attempt.url, Object.assign({signal:ctrl.signal}, attempt.opts));
+      clearTimeout(timer);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return await res.json();
+    }catch(e){ clearTimeout(timer); lastErr = e; console.warn('Ayaty: sunnahPost attempt failed:', attempt.url, e); }
+  }
+  throw lastErr;
+}
+function extractArray(obj){
+  if(Array.isArray(obj)) return obj;
+  if(!obj || typeof obj!=='object') return [];
+  for(const k of Object.keys(obj)){ if(Array.isArray(obj[k]) && obj[k].length && typeof obj[k][0]==='object') return obj[k]; }
+  for(const k of Object.keys(obj)){ if(Array.isArray(obj[k])) return obj[k]; }
+  return [];
+}
+function pickField(item, candidates){
+  if(!item) return '';
+  for(const c of candidates){ if(item[c]!==undefined && item[c]!==null && item[c]!=='') return item[c]; }
+  return '';
+}
+function itemTitle(item){ return pickField(item, ['name_arabic','arabic_title','asma_arabic','nama_arab','judul_arab','title_arabic','arabic_name','title','judul','nama','name','label']); }
+function itemBody(item){ return pickField(item, ['text_arabic','arabic_text','arabic_description','deskripsi_arab','arabic','التفسير','tafsir','penjelasan','arti','deskripsi','description','content','dalil','makna']); }
+function itemSub(item){ return pickField(item, ['transliteration','latin','text_indonesian','translation','kategori','category']); }
 const QURAN_LIST = 'https://api.alquran.cloud/v1/surah';
 const QURAN_SURAH = n => `https://api.alquran.cloud/v1/surah/${n}/quran-uthmani`;
 const QURAN_SURAH_EN = n => `https://api.alquran.cloud/v1/surah/${n}/en.sahih`;
@@ -511,6 +574,14 @@ const $ = sel => document.querySelector(sel);
 function $set(sel, html){ const el=$(sel); if(el) el.innerHTML = html; return !!el; }
 function showToast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); clearTimeout(showToast._t); showToast._t=setTimeout(()=>el.classList.remove('show'),2200); }
 
+function normalizeMp3QuranUrl(url){
+  try{
+    const u = new URL(url);
+    u.protocol = 'https:';
+    if(u.hostname === 'mp3quran.net') u.hostname = 'www.mp3quran.net';
+    return u.toString();
+  }catch(e){ return url; }
+}
 async function getJSON(url, timeoutMs){
   if(STATE.cache[url]) return STATE.cache[url];
   const ctrl = new AbortController();
@@ -742,12 +813,12 @@ function openMoreSheet(){
     <div class="more-grid">
       <button class="more-item" data-go="riwayat"><span class="m-ic">${ICON.layers}</span><b>${t('fRiwayat')}</b></button>
       <button class="more-item" data-go="moshaf"><span class="m-ic">${ICON.grid}</span><b>${t('fMoshaf')}</b></button>
-      <button class="more-item" data-go="tafasir"><span class="m-ic">${ICON.bubble}</span><b>${t('fTafasir')}</b></button>
       <button class="more-item" data-go="favorites"><span class="m-ic">${ICON.star}</span><b>${t('moreFavorites')}</b></button>
       <button class="more-item" data-go="prayer"><span class="m-ic">${ICON.clock}</span><b>${t('morePrayer')}</b></button>
       <button class="more-item" data-go="qibla"><span class="m-ic">${ICON.compass}</span><b>${t('moreQibla')}</b></button>
       <button class="more-item" data-go="hadith"><span class="m-ic">${ICON.book}</span><b>${t('moreHadith')}</b></button>
       <button class="more-item" data-go="azkar"><span class="m-ic">${ICON.beads}</span><b>${t('moreAzkar')}</b></button>
+      <button class="more-item" data-go="knowledge"><span class="m-ic">${ICON.book}</span><b>قاعدة المعرفة</b></button>
       <button class="more-item" data-go="settings"><span class="m-ic">${ICON.gear}</span><b>${t('moreSettings')}</b></button>
     </div>
   `);
@@ -776,6 +847,11 @@ function renderTopbar(){
     hadith:[t('moreHadith'),''], hadithBooks:[params.name||'', t('moreHadith')],
     hadithChapters:[params.bookName||'', t('hadithChapters')], hadithChapterDetail:[params.collectionName||'', t('hadithChapters')],
     azkar:[t('moreAzkar'),''], azkarList:[params.label||'', t('moreAzkar')],
+    knowledge:['قاعدة المعرفة',''], sunnahSearch:['البحث الشامل',''],
+    sunnahHadith:['الأحاديث النبوية',''], sunnahHadithNum:[params.label||'', 'حديث'],
+    sunnahTafsir:['تفسير ابن كثير',''], rijal:['رواة الحديث',''],
+    simpleList:[(SUNNAH_SIMPLE_LISTS[params.key]&&SUNNAH_SIMPLE_LISTS[params.key].ar)||'', ''],
+    simpleListDetail:[params.label||'', ''], mosqueFinder:['مساجد قريبة منك',''], sunnahCalendar:['تقويم السنن والصيام',''],
     settings:[t('settingsTitle'),'']
   };
   const [ti, sub] = titles[screen] || [screen,''];
@@ -821,6 +897,11 @@ function render(){
     hadith:renderHadith, hadithBooks:()=>renderHadithBooks(params),
     hadithChapters:()=>renderHadithChapters(params), hadithChapterDetail:()=>renderHadithChapterDetail(params),
     azkar:renderAzkar, azkarList:()=>renderAzkarList(params),
+    knowledge:renderKnowledge, sunnahSearch:renderSunnahSearch,
+    sunnahHadith:renderSunnahHadith, sunnahHadithNum:()=>renderSunnahHadithNum(params),
+    sunnahTafsir:()=>renderSunnahTafsir(params), rijal:renderRijal,
+    simpleList:()=>renderSimpleList(params), simpleListDetail:()=>renderSimpleListDetail(params),
+    mosqueFinder:renderMosqueFinder, sunnahCalendar:renderSunnahCalendar,
     settings:renderSettings
   };
   (fns[screen]||renderHome)();
@@ -860,7 +941,7 @@ async function renderHome(){
       <button class="feat" data-go="moshaf"><span class="f-ic">${ICON.grid}</span><b>${t('fMoshaf')}</b></button>
       <button class="feat" data-go="reciters"><span class="f-ic">${ICON.mic}</span><b>${t('fReciters')}</b></button>
       <button class="feat" data-go="radios"><span class="f-ic">${ICON.radio}</span><b>${t('fRadios')}</b></button>
-      <button class="feat" data-go="tafasir"><span class="f-ic">${ICON.bubble}</span><b>${t('fTafasir')}</b></button>
+      <button class="feat" data-go="knowledge"><span class="f-ic">${ICON.bubble}</span><b>قاعدة المعرفة</b></button>
     </div>
   `);
   document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click', ()=>nav(b.getAttribute('data-go'))));
@@ -1247,7 +1328,7 @@ async function renderTafasir(){
       </div>`).join('')}</div>`);
     $('#content').querySelectorAll('[data-tf]').forEach(row=>{
       const tf = list[Number(row.getAttribute('data-tf'))];
-      row.addEventListener('click', ()=>nav('tafsirSurahs', {tafsirUrl:tf.url, tafsirName:tf.name}));
+      row.addEventListener('click', ()=>nav('tafsirSurahs', {tafsirUrl:normalizeMp3QuranUrl(tf.url), tafsirName:tf.name}));
     });
   }catch(e){ if(myEpoch!==STATE.epoch) return; setContent(errBlock(t('loadErrTafasir'), renderTafasir)); }
 }
@@ -1270,26 +1351,36 @@ async function renderTafsirSurahs(params){
       const existing = btn.getAttribute('data-track-url');
       if(existing){ playTrack(existing, (STATE.settings.lang==='ar'?'سورة ':'Surah ')+surahName(sid), params.tafsirName); return; }
       btn.dataset.loading = '1';
-      btn.classList.add('spin-ic'); btn.innerHTML = ICON.refresh;
+      btn.classList.remove('play-error'); btn.classList.add('spin-ic'); btn.innerHTML = ICON.refresh;
       const clickEpoch = STATE.epoch;
-      try{
-        const sep = params.tafsirUrl.includes('?') ? '&' : '?';
-        const data = await getJSON(`${params.tafsirUrl}${sep}sura=${sid}`);
-        if(clickEpoch!==STATE.epoch) return;
-        const soraObj = (data.tafasir && data.tafasir.sora) || {};
-        const raw = soraObj[sid] || soraObj[String(sid)];
-        const item = Array.isArray(raw) ? raw[0] : raw;
-        const url = item && item.url;
-        btn.dataset.loading = '0'; btn.classList.remove('spin-ic');
-        if(!url){ btn.innerHTML = ICON.play; showToast(t('tafsirUnavailable')); return; }
-        btn.setAttribute('data-track-url', url);
-        btn.innerHTML = ICON.play;
-        playTrack(url, (STATE.settings.lang==='ar'?'سورة ':'Surah ')+surahName(sid), params.tafsirName);
-      }catch(e){
-        btn.dataset.loading = '0';
-        if(clickEpoch!==STATE.epoch) return;
-        btn.classList.remove('spin-ic'); btn.innerHTML = ICON.play; showToast(t('tafsirFetchErr'));
+      const sep = params.tafsirUrl.includes('?') ? '&' : '?';
+      const url2 = `${params.tafsirUrl}${sep}sura=${sid}`;
+      let data = null, lastErr = null;
+      for(let attempt=0; attempt<2 && !data; attempt++){
+        if(attempt>0) await new Promise(r=>setTimeout(r, 700));
+        try{ data = await getJSON(url2); }catch(e){ lastErr = e; }
       }
+      if(clickEpoch!==STATE.epoch) return;
+      btn.dataset.loading = '0'; btn.classList.remove('spin-ic');
+      if(!data){
+        console.error('Ayaty: tafsir audio fetch failed after retry', lastErr);
+        btn.classList.add('play-error'); btn.innerHTML = ICON.refresh;
+        showToast(isOffline() ? (STATE.settings.lang==='ar'?'لا يوجد اتصال بالإنترنت':'You appear to be offline') : t('tafsirFetchErr'));
+        return;
+      }
+      const soraObj = (data.tafasir && data.tafasir.sora) || {};
+      const raw = soraObj[sid] || soraObj[String(sid)];
+      const item = Array.isArray(raw) ? raw[0] : raw;
+      const url = item && item.url;
+      if(!url){
+        console.warn('Ayaty: no audio url in tafsir response for surah', sid, data);
+        btn.classList.add('play-error'); btn.innerHTML = ICON.refresh;
+        showToast(t('tafsirUnavailable'));
+        return;
+      }
+      btn.setAttribute('data-track-url', url);
+      btn.innerHTML = ICON.play;
+      playTrack(url, (STATE.settings.lang==='ar'?'سورة ':'Surah ')+surahName(sid), params.tafsirName);
     });
   });
 }
@@ -1900,6 +1991,291 @@ function renderAzkarDuaRows(q){
       renderAzkarDuaRows($('#azkarDuaSearch').value);
     });
   });
+}
+
+/* =====================================================================
+   AMANAH SUNNAH KNOWLEDGE BASE — /ask, /search, /hadith, /tafsir, /rijal,
+   /tawhid, /aqidah, /amalan, /nawawi, /doa, /asmaul-husna, /figures,
+   /maudhu, /mosque, /sunnah-calendar
+   ===================================================================== */
+const SUNNAH_HADITH_COLLECTIONS = [
+  {k:'bukhari', ar:'صحيح البخاري'}, {k:'muslim', ar:'صحيح مسلم'}, {k:'abudawud', ar:'سنن أبي داود'},
+  {k:'tirmidhi', ar:'جامع الترمذي'}, {k:'nasai', ar:'سنن النسائي'}, {k:'ibnmajah', ar:'سنن ابن ماجه'}, {k:'malik', ar:'موطأ مالك'}
+];
+const SUNNAH_SIMPLE_LISTS = {
+  tawhid:{ar:'كتاب التوحيد', endpoint:'/tawhid'}, aqidah:{ar:'العقيدة', endpoint:'/aqidah'},
+  amalan:{ar:'ممارسات السنة', endpoint:'/amalan'}, nawawi:{ar:'الأربعون النووية', endpoint:'/nawawi'},
+  doa:{ar:'الأدعية اليومية', endpoint:'/doa'}, asmaulhusna:{ar:'أسماء الله الحسنى', endpoint:'/asmaul-husna'},
+  maudhu:{ar:'أحاديث ضعيفة وموضوعة', endpoint:'/maudhu'}
+};
+
+function renderKnowledge(){
+  const items = [
+    ['sunnahSearch', ICON.search, 'البحث الشامل'],
+    ['sunnahHadith', ICON.book, 'الأحاديث النبوية (٧ كتب)'], ['sunnahTafsir', ICON.bubble, 'تفسير ابن كثير'],
+    ['rijal', ICON.person, 'رواة الحديث'], ['simple:tawhid', ICON.book, 'كتاب التوحيد'],
+    ['simple:aqidah', ICON.book, 'العقيدة'], ['simple:amalan', ICON.book, 'ممارسات السنة'],
+    ['simple:nawawi', ICON.book, 'الأربعون النووية'], ['simple:doa', ICON.book, 'الأدعية اليومية'],
+    ['simple:asmaulhusna', ICON.star, 'أسماء الله الحسنى'],
+    ['simple:maudhu', ICON.warn, 'أحاديث ضعيفة وموضوعة'], ['mosqueFinder', ICON.mosque, 'مساجد قريبة منك'],
+    ['sunnahCalendar', ICON.calendar, 'تقويم السنن والصيام']
+  ];
+  setContent(`<div class="list">${items.map(([key,ic,label])=>`
+    <div class="row" data-kb="${key}">
+      <div class="r-num">${ic}</div>
+      <div class="r-body"><b>${label}</b></div>
+      <div class="r-actions">${ICON.chev}</div>
+    </div>`).join('')}</div>`);
+  $('#content').querySelectorAll('[data-kb]').forEach(row=>{
+    const key = row.getAttribute('data-kb');
+    row.addEventListener('click', ()=>{
+      if(key.startsWith('simple:')) nav('simpleList', {key:key.split(':')[1]});
+      else nav(key);
+    });
+  });
+}
+
+/* ---- Universal search ---- */
+async function renderSunnahSearch(){
+  setContent(`
+    <div class="searchbar">${ICON.search}<input id="sunnahSearchInput" placeholder="ابحث في القرآن والحديث والرواة…"/></div>
+    <div class="azkar-chips" style="margin-top:0;">
+      <button class="azkar-chip active" data-type="">الكل</button>
+      <button class="azkar-chip" data-type="quran">القرآن</button>
+      <button class="azkar-chip" data-type="hadith">حديث</button>
+      <button class="azkar-chip" data-type="rijal">رجال</button>
+    </div>
+    <div id="sunnahSearchResult"></div>
+  `);
+  let currentType = '';
+  $('#sunnahSearchInput').addEventListener('keydown', e=>{ if(e.key==='Enter') runSearch(); });
+  $('#content').querySelectorAll('[data-type]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      $('#content').querySelectorAll('[data-type]').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); currentType = b.getAttribute('data-type'); runSearch();
+    });
+  });
+  async function runSearch(){
+    const q = $('#sunnahSearchInput').value.trim();
+    if(!q) return;
+    const myEpoch = STATE.epoch;
+    $set('#sunnahSearchResult', loadingBlock());
+    try{
+      const body = {q, limit:20}; if(currentType) body.type = currentType;
+      const data = await sunnahPost('/search', body);
+      if(myEpoch!==STATE.epoch) return;
+      const results = data['نتائج'] || data.results || [];
+      if(!results.length){ $set('#sunnahSearchResult', emptyBlock(t('noMatchSurah'))); return; }
+      $set('#sunnahSearchResult', `<div class="list">${results.map(r=>{
+        const txt = pickField(r, ['text_arabic','arabic_text','name_arabic','text']);
+        const kindRaw = r._type || r.type || '';
+        const kindMap = {quran:'قرآن', hadith:'حديث', rijal:'راوٍ'};
+        const kind = kindMap[kindRaw] || kindRaw;
+        return `<div class="ayat-wrap" style="margin:0;padding:14px 16px;">
+          <div class="hadith-text">${txt}</div>
+          ${kind?`<div style="margin-top:8px;"><span class="chip gold">${kind}</span></div>`:''}
+        </div>`;
+      }).join('')}</div>`.replace('<div class="list">','<div class="list" style="gap:9px;">'));
+    }catch(e){
+      if(myEpoch!==STATE.epoch) return;
+      $set('#sunnahSearchResult', isOffline() ? offlineBlock(()=>{}) : errBlock('تعذر البحث.', ()=>{}));
+    }
+  }
+}
+
+/* ---- Hadith by collection:number ---- */
+function renderSunnahHadith(){
+  setContent(`<div class="list">${SUNNAH_HADITH_COLLECTIONS.map(c=>`
+    <div class="row" data-col="${c.k}">
+      <div class="r-num">${ICON.book}</div>
+      <div class="r-body"><b>${c.ar}</b></div>
+      <div class="r-actions">${ICON.chev}</div>
+    </div>`).join('')}</div>`);
+  $('#content').querySelectorAll('[data-col]').forEach(row=>{
+    const c = SUNNAH_HADITH_COLLECTIONS.find(x=>x.k===row.getAttribute('data-col'));
+    row.addEventListener('click', ()=>nav('sunnahHadithNum', {collection:c.k, label:c.ar, num:1}));
+  });
+}
+async function renderSunnahHadithNum(params){
+  const num = params.num||1;
+  setContent(`
+    <div class="reader-toolbar">
+      <button class="pill-btn" id="hPrev">${ICON.chev}<span>السابق</span></button>
+      <div class="pill-btn" style="pointer-events:none;">${STATE.settings.lang==='ar'?'حديث رقم':'Hadith #'} ${nd(num)}</div>
+      <button class="pill-btn" id="hNext"><span>التالي</span>${ICON.chev}</button>
+    </div>
+    <div id="hadithNumWrap">${loadingBlock()}</div>
+  `);
+  $('#hPrev').addEventListener('click', ()=>{ if(num<=1) return; STATE.stack[STATE.stack.length-1]={screen:'sunnahHadithNum',params:Object.assign({},params,{num:num-1})}; render(); });
+  $('#hNext').addEventListener('click', ()=>{ STATE.stack[STATE.stack.length-1]={screen:'sunnahHadithNum',params:Object.assign({},params,{num:num+1})}; render(); });
+  const myEpoch = STATE.epoch;
+  try{
+    const data = await sunnahGet(`/hadith/${params.collection}:${num}`);
+    if(myEpoch!==STATE.epoch) return;
+    const txt = pickField(data, ['text_arabic']);
+    const grades = data.grades || [];
+    const bookName = pickField(data, ['اسم_القسم','book_name']);
+    if(!txt){ $set('#hadithNumWrap', emptyBlock(t('hadithNoData'))); return; }
+    $set('#hadithNumWrap', `<div class="ayat-wrap" style="margin:0 16px;">
+      <div class="hadith-text" style="font-size:16px;">${txt}</div>
+      ${bookName?`<div style="margin-top:10px;font-size:11.5px;color:var(--ink-faint);">${bookName}</div>`:''}
+      ${grades.length?`<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">${grades.map(g=>`<span class="chip gold">${g.grade||g.grade_by||''} ${g.graded_by?'— '+g.graded_by:''}</span>`).join('')}</div>`:''}
+    </div>`);
+  }catch(e){ if(myEpoch!==STATE.epoch) return; $set('#hadithNumWrap', errBlock('تعذر تحميل الحديث.', ()=>renderSunnahHadithNum(params))); }
+}
+
+/* ---- Tafsir Ibn Kathir by surah:ayah ---- */
+async function renderSunnahTafsir(params){
+  params = params || {};
+  await loadMasterSuwar().catch(()=>{});
+  const surah = params.surah || 1, ayah = params.ayah || 1;
+  setContent(`
+    <div class="pad">
+      <div class="form-row">
+        <select id="tfSurah" style="flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:9px;background:var(--bg-deep);color:var(--ink);">
+          ${(MASTER_SUWAR||[]).map(s=>`<option value="${s.id}" ${s.id===surah?'selected':''}>${s.id}. ${s.nameAr}</option>`).join('')}
+        </select>
+        <input id="tfAyah" type="number" min="1" value="${ayah}" style="width:80px;border:1px solid var(--line);border-radius:var(--r-sm);padding:9px;background:var(--bg-deep);color:var(--ink);text-align:center;">
+        <button class="pill-btn" id="tfGo">${ICON.search}</button>
+      </div>
+    </div>
+    <div id="tafsirIbnKathirWrap">${loadingBlock()}</div>
+  `);
+  $('#tfGo').addEventListener('click', ()=>{
+    const s = Number($('#tfSurah').value), a = Number($('#tfAyah').value)||1;
+    STATE.stack[STATE.stack.length-1] = {screen:'sunnahTafsir', params:{surah:s, ayah:a}};
+    render();
+  });
+  const myEpoch = STATE.epoch;
+  try{
+    const data = await sunnahGet(`/tafsir/${surah}:${ayah}`);
+    if(myEpoch!==STATE.epoch) return;
+    const arabicVerse = pickField(data, ['text_arabic']);
+    const tafsirText = pickField(data, ['التفسير','tafsir']);
+    if(!tafsirText && !arabicVerse){ $set('#tafsirIbnKathirWrap', emptyBlock(t('hadithNoData'))); return; }
+    $set('#tafsirIbnKathirWrap', `<div class="ayat-wrap" style="margin:0 16px;">
+      ${arabicVerse?`<div class="ayat-txt" style="font-size:20px;margin-bottom:14px;">${arabicVerse}</div>`:''}
+      ${tafsirText?`<div class="hadith-text">${tafsirText}</div>`:''}
+    </div>`);
+  }catch(e){ if(myEpoch!==STATE.epoch) return; $set('#tafsirIbnKathirWrap', errBlock('تعذر تحميل التفسير.', ()=>renderSunnahTafsir({surah,ayah}))); }
+}
+
+/* ---- Rijal (narrator biographies) search ---- */
+async function renderRijal(){
+  setContent(`<div class="searchbar">${ICON.search}<input id="rijalSearch" placeholder="ابحث عن اسم راوٍ… مثال: البخاري"/></div><div id="rijalResult"></div>`);
+  $('#rijalSearch').addEventListener('keydown', async e=>{
+    if(e.key!=='Enter') return;
+    const q = e.target.value.trim(); if(!q) return;
+    const myEpoch = STATE.epoch;
+    $set('#rijalResult', loadingBlock());
+    try{
+      const data = await sunnahGet(`/rijal?q=${encodeURIComponent(q)}&limit=20`);
+      if(myEpoch!==STATE.epoch) return;
+      const results = data['نتائج'] || data.results || [];
+      if(!results.length){ $set('#rijalResult', emptyBlock(t('noMatchReciter'))); return; }
+      $set('#rijalResult', `<div class="list">${results.map(r=>{
+        const name = pickField(r, ['name_arabic','name']);
+        const kuniyah = pickField(r, ['kuniyah']);
+        const grade = pickField(r, ['grade']);
+        const gradeDetail = pickField(r, ['grade_detail']);
+        return `<div class="row"><div class="r-avatar">${(name||'؟').trim()[0]||'؟'}</div>
+          <div class="r-body"><b>${name}</b><span>${[kuniyah,grade,gradeDetail].filter(Boolean).join(' · ')}</span></div>
+        </div>`;
+      }).join('')}</div>`);
+    }catch(e){
+      if(myEpoch!==STATE.epoch) return;
+      $set('#rijalResult', isOffline() ? offlineBlock(()=>{}) : errBlock('تعذر البحث.', ()=>{}));
+    }
+  });
+}
+
+/* ---- Generic simple knowledge lists (tawhid/aqidah/amalan/nawawi/doa/asmaulhusna/figures/maudhu) ---- */
+async function renderSimpleList(params){
+  const cfg = SUNNAH_SIMPLE_LISTS[params.key];
+  if(!cfg){ setContent(emptyBlock(t('hadithNoData'))); return; }
+  const myEpoch = STATE.epoch;
+  setContent(loadingBlock());
+  try{
+    const data = await sunnahGet(cfg.endpoint);
+    if(myEpoch!==STATE.epoch) return;
+    const arr = extractArray(data);
+    if(!arr.length){ setContent(emptyBlock(t('hadithNoData'))); return; }
+    STATE._simpleListCache = STATE._simpleListCache || {};
+    STATE._simpleListCache[params.key] = arr;
+    setContent(`<div class="list">${arr.map((it,i)=>{
+      const title = itemTitle(it) || ('#'+(i+1));
+      const sub = itemSub(it) || itemBody(it);
+      return `<div class="row" data-sl="${i}"><div class="r-num">${nd(i+1)}</div>
+        <div class="r-body"><b>${title}</b>${sub?`<span>${String(sub).replace(/<[^>]+>/g,'').slice(0,70)}</span>`:''}</div>
+        <div class="r-actions">${ICON.chev}</div></div>`;
+    }).join('')}</div>`);
+    $('#content').querySelectorAll('[data-sl]').forEach(row=>{
+      row.addEventListener('click', ()=>nav('simpleListDetail', {key:params.key, idx:Number(row.getAttribute('data-sl')), label:cfg.ar}));
+    });
+  }catch(e){
+    if(myEpoch!==STATE.epoch) return;
+    setContent(isOffline() ? offlineBlock(()=>renderSimpleList(params)) : errBlock('تعذر تحميل البيانات.', ()=>renderSimpleList(params)));
+  }
+}
+function renderSimpleListDetail(params){
+  const arr = (STATE._simpleListCache||{})[params.key] || [];
+  const it = arr[params.idx];
+  if(!it){ setContent(emptyBlock(t('hadithNoData'))); return; }
+  const title = itemTitle(it);
+  const body = itemBody(it);
+  const sub = itemSub(it);
+  setContent(`<div class="ayat-wrap" style="margin:16px;">
+    ${title?`<h3 style="margin:0 0 12px;font-size:16px;color:var(--ink);">${title}</h3>`:''}
+    ${body?`<div class="hadith-text" style="font-family:var(--font-quran);font-size:19px;line-height:2;">${body}</div>`:''}
+    ${sub && sub!==body?`<div class="hadith-text" style="margin-top:12px;opacity:.8;">${sub}</div>`:''}
+  </div>`);
+}
+
+/* ---- Nearby mosques ---- */
+async function renderMosqueFinder(){
+  setContent(loadingBlock());
+  const myEpoch = STATE.epoch;
+  const loc = await getApproxLocation();
+  if(myEpoch!==STATE.epoch) return;
+  if(!loc){ setContent(errBlock('تعذر تحديد موقعك.', renderMosqueFinder)); return; }
+  try{
+    const data = await sunnahGet(`/mosque?lat=${loc.latitude}&lng=${loc.longitude}`);
+    if(myEpoch!==STATE.epoch) return;
+    const list = data['المساجد'] || data.mosques || [];
+    if(!list.length){ setContent(emptyBlock('لا توجد مساجد قريبة مسجّلة.')); return; }
+    setContent(`<div class="list">${list.map(m=>{
+      const name = pickField(m, ['الاسم','name']);
+      const addr = pickField(m, ['العنوان','address']);
+      const city = pickField(m, ['المدينة','city']);
+      return `<div class="row"><div class="r-num">${ICON.mosque}</div>
+        <div class="r-body"><b>${name}</b><span>${[addr,city].filter(Boolean).join('، ')}</span></div></div>`;
+    }).join('')}</div>`);
+  }catch(e){ if(myEpoch!==STATE.epoch) return; setContent(errBlock('تعذر تحميل المساجد القريبة.', renderMosqueFinder)); }
+}
+
+/* ---- Sunnah calendar (fasting days & Islamic events) ---- */
+async function renderSunnahCalendar(){
+  const now = new Date();
+  setContent(loadingBlock());
+  const myEpoch = STATE.epoch;
+  try{
+    const data = await sunnahGet(`/sunnah-calendar?month=${now.getMonth()+1}&year=${now.getFullYear()}`);
+    if(myEpoch!==STATE.epoch) return;
+    const days = (data.days || []).filter(d => d.events && d.events.length);
+    if(!days.length){ setContent(emptyBlock('لا توجد أحداث هذا الشهر.')); return; }
+    setContent(`<div class="list">${days.map(d=>{
+      const hijri = d.hijri ? `${nd(d.hijri.day)} ${d.hijri.monthName||''} ${nd(d.hijri.year)}هـ` : '';
+      return `<div class="ayat-wrap" style="margin:0;padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <b style="font-size:13px;">${d.date}</b><span style="font-size:11px;color:var(--ink-faint);">${hijri}</span>
+        </div>
+        ${(d.events||[]).map(ev=>`<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--line);">
+          <div style="font-size:13.5px;color:var(--ink);">${ev.label||''}</div>
+          ${ev.dalil?`<div style="font-size:11px;color:var(--gold-700);margin-top:3px;">${ev.dalil}</div>`:''}
+        </div>`).join('')}
+      </div>`;
+    }).join('')}</div>`.replace('<div class="list">','<div class="list" style="gap:10px;">'));
+  }catch(e){ if(myEpoch!==STATE.epoch) return; setContent(errBlock('تعذر تحميل التقويم.', renderSunnahCalendar)); }
 }
 
 /* =====================================================================
